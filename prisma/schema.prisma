@@ -1,0 +1,163 @@
+// RestoKonect — schéma de base de données (MVP)
+// Prix et montants sont en FCFA entiers (pas de centimes en zone UEMOA)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Restaurant {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String?  @unique // identifiant public pour le menu client (/r/slug)
+  whatsappNumber String?  // numéro WhatsApp du resto, format international sans + (ex: 2250701020304)
+  createdAt      DateTime @default(now())
+
+  users       User[]
+  categories  Category[]
+  products    Product[]
+  orders      Order[]
+  stockItems  StockItem[]
+  employees   Employee[]
+}
+
+// Un utilisateur = un membre d'un restaurant (gérant par défaut)
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String
+  role          String   @default("GERANT") // GERANT | SERVEUR
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model Category {
+  id           String   @id @default(cuid())
+  restaurantId String
+  name         String
+  position     Int      @default(0)
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  products     Product[]
+
+  @@unique([restaurantId, name])
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  restaurantId String
+  categoryId   String?
+  name         String
+  price        Int // en FCFA
+  available    Boolean  @default(true)
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category     Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  orderItems   OrderItem[]
+}
+
+enum OrderType {
+  SUR_PLACE
+  EMPORTER
+  LIVRAISON
+}
+
+enum OrderStatus {
+  OUVERTE
+  PAYEE
+  ANNULEE
+}
+
+enum PaymentMethod {
+  ESPECES
+  MOBILE_MONEY
+  CARTE
+  AUTRE
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  restaurantId  String
+  number        Int          @unique
+  type          OrderType    @default(SUR_PLACE)
+  status        OrderStatus  @default(OUVERTE)
+  paymentMethod PaymentMethod?
+  note          String?
+  total         Int          @default(0)
+  createdAt     DateTime     @default(now())
+  paidAt        DateTime?
+
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String?
+  name      String
+  unitPrice Int
+  qty       Int     @default(1)
+
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model StockItem {
+  id             String  @id @default(cuid())
+  restaurantId   String
+  name           String
+  unit           String  @default("unité") // kg, L, pièce, sac...
+  qty            Float   @default(0)
+  alertThreshold Float   @default(0)
+
+  restaurant     Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  movements      StockMovement[]
+
+  @@unique([restaurantId, name])
+}
+
+enum MovementType {
+  ENTREE
+  SORTIE
+  AJUSTEMENT
+}
+
+model StockMovement {
+  id          String       @id @default(cuid())
+  stockItemId String
+  type        MovementType
+  qty         Float
+  reason      String?
+  createdAt   DateTime     @default(now())
+
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+}
+
+model Employee {
+  id           String   @id @default(cuid())
+  restaurantId String
+  name         String
+  role         String   @default("SERVEUR") // GERANT | CUISINE | SERVEUR | LIVREUR | CAISSIER
+  phone        String?
+  active       Boolean  @default(true)
+  monthlySalary Int?    // en FCFA, optionnel
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  timeEntries  TimeEntry[]
+}
+
+model TimeEntry {
+  id         String    @id @default(cuid())
+  employeeId String
+  clockIn    DateTime  @default(now())
+  clockOut   DateTime?
+
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
