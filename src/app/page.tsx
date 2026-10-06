@@ -2,6 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/logo";
 
+const WHATSAPP_URL =
+  "https://wa.me/2250748323191?text=" +
+  encodeURIComponent(
+    "Bonjour RestoKonect ! Je suis intéressé pour mon restaurant à Abidjan."
+  );
+
 const features = [
   {
     title: "Caisse rapide",
@@ -41,6 +47,20 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Logo size={80} />
           <div className="flex items-center gap-2">
+            <Link
+              href="/plans"
+              className="hidden text-sm font-semibold text-stone-700 hover:text-orange-600 sm:block"
+            >
+              Nos Tarifs
+            </Link>
+            <a
+              href="/guide-restokonect.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden text-sm font-semibold text-stone-700 hover:text-orange-600 sm:block"
+            >
+              📖 Guide
+            </a>
             <Link href="/login" className="btn btn-secondary">
               Se connecter
             </Link>
@@ -58,8 +78,8 @@ export default function Home() {
             🇨🇮 Conçu pour les restaurants d&apos;Abidjan
           </p>
           <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">
-            Votre maquis, géré comme un{" "}
-            <span className="text-orange-600">grand restaurant.</span>
+            Votre maquis/resto géré comme un{" "}
+            <span className="text-orange-600">PRO.</span>
           </h1>
           <p className="mt-4 text-lg text-stone-600">
             La caisse, le stock et le personnel de votre restaurant — en un
@@ -82,6 +102,24 @@ export default function Home() {
           <p className="mt-4 text-sm text-stone-500">
             Sans carte bancaire · Prêt en 5 minutes · Support en français
           </p>
+          <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold">
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#128C4A] hover:underline"
+            >
+              💬 Poser une question sur WhatsApp
+            </a>
+            <a
+              href="/guide-restokonect.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-600 hover:underline"
+            >
+              📖 Guide de démarrage (PDF)
+            </a>
+          </div>
         </div>
 
         {/* Collage photos */}
@@ -192,7 +230,38 @@ export default function Home() {
         <p className="mt-2">
           Fait avec ❤️ pour les restaurants d&apos;Abidjan
         </p>
+        <div className="mt-3 flex flex-wrap justify-center gap-4 text-sm">
+          <Link href="/plans" className="font-semibold text-stone-600 hover:text-orange-600">
+            Nos Tarifs
+          </Link>
+          <a
+            href="/guide-restokonect.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-stone-600 hover:text-orange-600"
+          >
+            Guide de démarrage (PDF)
+          </a>
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[#128C4A] hover:underline"
+          >
+            💬 WhatsApp : +225 07 48 32 31 91
+          </a>
+        </div>
       </footer>
+      {/* Bouton WhatsApp flottant */}
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Nous contacter sur WhatsApp"
+        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-2xl text-white shadow-lg transition hover:scale-105"
+      >
+        💬
+      </a>
     </main>
   );
 }
