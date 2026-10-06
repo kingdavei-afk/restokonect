@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import Logo from "@/components/logo";
 import { registerAction, type RegisterState } from "./actions";
 
 const initialState: RegisterState = {};
@@ -15,8 +16,11 @@ export default function RegisterPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-10">
       <div className="card w-full max-w-sm">
-        <h1 className="text-xl font-bold">Créer votre restaurant</h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <div className="flex justify-center">
+          <Logo href="/" size={120} />
+        </div>
+        <h1 className="mt-4 text-center text-xl font-bold">Créer votre restaurant</h1>
+        <p className="mt-1 text-center text-sm text-stone-500">
           Gratuit pendant le MVP. Aucune carte bancaire requise.
         </p>
 

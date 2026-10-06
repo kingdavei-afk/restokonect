@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import Logo from "@/components/logo";
 
 const features = [
   {
@@ -38,9 +39,7 @@ export default function Home() {
       {/* Barre de navigation */}
       <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <p className="text-lg font-bold tracking-tight">
-            Resto<span className="text-orange-600">Konect</span>
-          </p>
+          <Logo size={80} />
           <div className="flex items-center gap-2">
             <Link href="/login" className="btn btn-secondary">
               Se connecter
@@ -186,8 +185,13 @@ export default function Home() {
         </Link>
       </section>
 
-      <footer className="border-t border-stone-200 py-6 text-center text-sm text-stone-500">
-        RestoKonect — Fait avec ❤️ pour les restaurants d&apos;Abidjan
+      <footer className="border-t border-stone-200 py-8 text-center text-sm text-stone-500">
+        <div className="flex justify-center">
+          <Logo size={72} />
+        </div>
+        <p className="mt-2">
+          Fait avec ❤️ pour les restaurants d&apos;Abidjan
+        </p>
       </footer>
     </main>
   );

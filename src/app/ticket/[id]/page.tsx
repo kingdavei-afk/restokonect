@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
@@ -39,7 +40,17 @@ export default async function TicketPage({
 
       {/* Reçu */}
       <div className="receipt mx-auto w-72 rounded-lg border border-stone-200 bg-white p-4 font-mono text-[13px] leading-5 shadow">
-        <p className="text-center text-sm font-bold uppercase">
+        <div className="flex justify-center">
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Logo RestoKonect"
+              width={80}
+              height={80}
+            />
+          </Link>
+        </div>
+        <p className="mt-1 text-center text-sm font-bold uppercase">
           {user.restaurant.name}
         </p>
         <p className="mt-1 text-center text-xs">Ticket #{order.number}</p>

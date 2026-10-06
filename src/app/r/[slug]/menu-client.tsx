@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { formatFCFA } from "@/lib/format";
 import { createWhatsappOrderAction } from "./actions";
@@ -169,6 +171,22 @@ export default function MenuClient({
           </button>
         ))}
       </div>
+
+      <footer className="mt-10 flex items-center justify-center gap-1.5 text-xs text-stone-400">
+        Propulsé par
+        <Link
+          href="/"
+          className="inline-flex items-center font-semibold text-stone-500 hover:text-orange-600"
+        >
+          <Image
+            src="/logo.png"
+            alt="Logo RestoKonect"
+            width={40}
+            height={40}
+            className="rounded"
+          />
+        </Link>
+      </footer>
 
       {/* Panier flottant */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-stone-200 bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
