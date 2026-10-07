@@ -19,9 +19,25 @@ export async function loginAction(
     return { error: "Veuillez remplir tous les champs." };
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { restaurant: true },
+  });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Email ou mot de passe incorrect." };
+  }
+
+  // Super-admin : espace de supervision dédié
+  if (user.role === "SUPERADMIN") {
+    await createSession(user.id);
+    redirect("/admin");
+  }
+
+  // Restaurant suspendu par le super-admin : connexion bloquée
+  if (user.restaurant && !user.restaurant.active) {
+    return {
+      error: "Ce restaurant est actuellement suspendu. Contactez le support RestoKonect.",
+    };
   }
 
   await createSession(user.id);

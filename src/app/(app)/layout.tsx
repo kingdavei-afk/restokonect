@@ -11,6 +11,11 @@ export default async function AppLayout({
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
+  // Le super-admin a sa propre section (/admin)
+  if (user.role === "SUPERADMIN") redirect("/admin");
+  // Restaurant suspendu : session coupée
+  if (!user.restaurant) redirect("/login");
+
   const permissions: Permission[] =
     ROLE_PERMISSIONS[user.role as keyof typeof ROLE_PERMISSIONS] ?? [];
 

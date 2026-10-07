@@ -1,5 +1,5 @@
 // Rôles et permissions RestoKonect
-export type Role = "GERANT" | "SERVEUR" | "CAISSIER";
+export type Role = "GERANT" | "SERVEUR" | "CAISSIER" | "SUPERADMIN";
 
 export type Permission =
   | "caisse" // utiliser la caisse (prise de commande)
@@ -26,6 +26,8 @@ const ALL: Permission[] = [
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   GERANT: ALL,
+  // Super-admin : supervision de la plateforme (section /admin dédiée)
+  SUPERADMIN: [],
   // Caissier : caisse complète + journal des ventes
   CAISSIER: ["caisse", "caisse.pay", "journal"],
   // Serveur : prise de commande uniquement (pas d'encaissement)
@@ -36,6 +38,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   GERANT: "Gérant",
   CAISSIER: "Caissier",
   SERVEUR: "Serveur",
+  SUPERADMIN: "Super-admin",
 };
 
 export function can(user: { role: string }, permission: Permission): boolean {
@@ -44,5 +47,10 @@ export function can(user: { role: string }, permission: Permission): boolean {
 }
 
 export function isRole(value: string): value is Role {
-  return value === "GERANT" || value === "SERVEUR" || value === "CAISSIER";
+  return (
+    value === "GERANT" ||
+    value === "SERVEUR" ||
+    value === "CAISSIER" ||
+    value === "SUPERADMIN"
+  );
 }

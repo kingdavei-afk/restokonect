@@ -45,9 +45,12 @@ src/lib/                    # db (Prisma), auth (session), format (FCFA)
 
 | Rôle | Accès |
 | ---- | ----- |
+| **Super-admin** | Supervision de toute la plateforme (`/admin`) |
 | **Gérant** | Tout (menu, stock, personnel, stats, réglages, comptes) |
 | **Caissier** | Caisse complète (encaissement) + journal des ventes |
 | **Serveur** | Caisse en prise de commande uniquement (pas d'encaissement) |
+
+Créer ou promouvoir un super-admin : `npx tsx scripts/create-superadmin.ts <email> <motdepasse> <nom>`
 
 Les comptes se créent dans **Comptes** (réservé au gérant). Les permissions sont
 vérifiées côté serveur dans chaque page et chaque action.
@@ -60,5 +63,6 @@ vérifiées côté serveur dans chaque page et chaque action.
 - [x] Statistiques (jour / 7 j / 30 j) + export Excel
 - [x] Impression du ticket (reçu 72 mm)
 - [x] Multi-utilisateurs (gérant / caissier / serveur)
+- [x] Super-admin : supervision de tous les restaurants
 - [ ] Intégration paiement Mobile Money marchand (CinetPay / Wave)
 - [ ] Déploiement production (PostgreSQL)

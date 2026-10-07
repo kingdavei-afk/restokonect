@@ -46,9 +46,21 @@ export async function getSessionUser() {
   const [userId, ts, sig] = parts;
   if (sign(`${userId}.${ts}`) !== sig) return null;
 
-  const user = await prisma.user.findUnique({
+  const raw = await prisma.user.findUnique({
     where: { id: userId },
     include: { restaurant: true },
   });
-  return user;
+  if (!raw) return null;
+
+  // restaurantId est null uniquement pour les super-admins, cantonnés à la
+  // section /admin. Incohérence inattendue = session invalide.
+  if (raw.restaurantId === null && raw.role !== "SUPERADMIN") return null;
+
+  // Les pages de l'espace restaurant vérifient les permissions AVANT d'utiliser
+  // restaurantId ou restaurant, donc un super-admin ne peut jamais y arriver.
+  type AppUser = Omit<NonNullable<typeof raw>, "restaurantId" | "restaurant"> & {
+    restaurantId: string;
+    restaurant: NonNullable<NonNullable<typeof raw>["restaurant"]>;
+  };
+  return raw as AppUser;
 }
