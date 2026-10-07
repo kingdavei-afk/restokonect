@@ -16,6 +16,8 @@ model Restaurant {
   slug           String?  @unique // identifiant public pour le menu client (/r/slug)
   whatsappNumber String?  // numéro WhatsApp du resto, format international sans + (ex: 2250701020304)
   active         Boolean  @default(true) // false = suspendu par le super-admin
+  plan           String   @default("TRIAL") // TRIAL | STARTER | PRO | BUSINESS
+  trialEndsAt    DateTime? // fin de la période d'essai (14 jours après l'inscription)
   createdAt      DateTime @default(now())
 
   users       User[]

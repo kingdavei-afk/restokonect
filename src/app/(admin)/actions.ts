@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSessionUser, destroySession } from "@/lib/auth";
+import { isPlanId } from "@/lib/plans";
 
 async function requireSuperAdmin() {
   const user = await getSessionUser();
@@ -27,6 +28,28 @@ export async function toggleRestaurantActiveAction(formData: FormData) {
   await prisma.restaurant.update({
     where: { id: restaurant.id },
     data: { active: !restaurant.active },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/restaurants");
+  revalidatePath(`/admin/restaurants/${id}`);
+}
+
+// Changer le plan d'un restaurant (après abonnement WhatsApp)
+export async function setPlanAction(formData: FormData) {
+  await requireSuperAdmin();
+  const id = String(formData.get("id") ?? "");
+  const plan = String(formData.get("plan") ?? "TRIAL");
+  if (!isPlanId(plan)) return;
+
+  await prisma.restaurant.update({
+    where: { id },
+    data: {
+      plan,
+      // Nouvel essai si retour au plan TRIAL
+      trialEndsAt:
+        plan === "TRIAL" ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) : null,
+    },
   });
 
   revalidatePath("/admin");

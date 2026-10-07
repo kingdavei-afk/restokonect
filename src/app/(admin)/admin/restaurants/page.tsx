@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { formatDateFr } from "@/lib/format";
 import { formatFCFA } from "@/lib/format";
+import { getPlanInfo } from "@/lib/plans";
 
 export default async function AdminRestaurantsPage() {
   const [restaurants, caByResto] = await Promise.all([
@@ -39,6 +40,7 @@ export default async function AdminRestaurantsPage() {
               <th className="py-2 pr-3">Commandes</th>
               <th className="py-2 pr-3">CA cumulé</th>
               <th className="py-2 pr-3">Statut</th>
+              <th className="py-2 pr-3">Plan</th>
               <th className="py-2"></th>
             </tr>
           </thead>
@@ -81,6 +83,11 @@ export default async function AdminRestaurantsPage() {
                     }`}
                   >
                     {r.active ? "Actif" : "Suspendu"}
+                  </span>
+                </td>
+                <td className="py-2.5 pr-3">
+                  <span className="rounded-full bg-stone-200 px-2 py-0.5 text-xs font-semibold text-stone-700">
+                    {getPlanInfo(r).limits.label}
                   </span>
                 </td>
                 <td className="py-2.5">

@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { can, type Permission } from "@/lib/permissions";
+import { getPlanInfo } from "@/lib/plans";
 
 async function requireUser(perm: Permission = "menu") {
   const user = await getSessionUser();
@@ -49,6 +51,15 @@ export async function addProductAction(formData: FormData) {
   const price = parseInt(String(formData.get("price") ?? ""), 10);
   const categoryId = String(formData.get("categoryId") ?? "");
   if (!name || Number.isNaN(price) || price <= 0) return;
+
+  // Limite du plan : nombre maximum de plats
+  const info = getPlanInfo(user.restaurant);
+  const productsCount = await prisma.product.count({
+    where: { restaurantId: user.restaurantId },
+  });
+  if (productsCount >= info.limits.products) {
+    redirect("/menu?error=limite");
+  }
 
   await prisma.product.create({
     data: {

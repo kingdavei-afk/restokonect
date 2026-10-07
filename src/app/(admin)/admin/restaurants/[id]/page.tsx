@@ -4,7 +4,9 @@ import { prisma } from "@/lib/db";
 import { formatDateFr, formatDateTime, formatFCFA } from "@/lib/format";
 import {
   toggleRestaurantActiveAction,
+  setPlanAction,
 } from "../../../actions";
+import { PLAN_LIMITS, getPlanInfo, type PlanId } from "@/lib/plans";
 import ConfirmDelete from "./confirm-delete";
 
 export default async function AdminRestaurantDetailPage({
@@ -78,15 +80,20 @@ export default async function AdminRestaurantDetailPage({
             )}
           </p>
         </div>
-        <span
-          className={`rounded-full px-3 py-1 text-sm font-semibold ${
-            restaurant.active
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {restaurant.active ? "Actif" : "Suspendu"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-stone-200 px-3 py-1 text-sm font-semibold text-stone-700">
+            Plan {getPlanInfo(restaurant).limits.label}
+          </span>
+          <span
+            className={`rounded-full px-3 py-1 text-sm font-semibold ${
+              restaurant.active
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {restaurant.active ? "Actif" : "Suspendu"}
+          </span>
+        </div>
       </div>
 
       {/* Stats */}
@@ -207,6 +214,24 @@ export default async function AdminRestaurantDetailPage({
           conservées. La suppression est définitive.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
+          {/* Changer le plan (après abonnement WhatsApp du client) */}
+          <form action={setPlanAction} className="flex items-center gap-2">
+            <input type="hidden" name="id" value={restaurant.id} />
+            <select
+              name="plan"
+              defaultValue={getPlanInfo(restaurant).plan}
+              className="input w-auto text-sm"
+            >
+              {(Object.keys(PLAN_LIMITS) as PlanId[]).map((p) => (
+                <option key={p} value={p}>
+                  {PLAN_LIMITS[p].label}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="btn btn-primary text-sm">
+              Appliquer le plan
+            </button>
+          </form>
           <form action={toggleRestaurantActiveAction}>
             <input type="hidden" name="id" value={restaurant.id} />
             <button

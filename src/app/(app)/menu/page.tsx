@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
+import { getPlanInfo, whatsappSubscribeUrl } from "@/lib/plans";
 import { prisma } from "@/lib/db";
 import { formatFCFA } from "@/lib/format";
 import {
@@ -12,10 +13,19 @@ import {
   deleteProductAction,
 } from "./actions";
 
-export default async function MenuPage() {
+export default async function MenuPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await getSessionUser();
   if (!user) return null;
   if (!can(user, "menu")) redirect("/dashboard");
+  const { error } = await searchParams;
+  const info = getPlanInfo(user.restaurant);
+  const productsCount = await prisma.product.count({
+    where: { restaurantId: user.restaurantId },
+  });
 
   const categories = await prisma.category.findMany({
     where: { restaurantId: user.restaurantId },
@@ -33,6 +43,30 @@ export default async function MenuPage() {
       <p className="mt-1 text-sm text-stone-500">
         Gérez vos catégories, vos plats et leurs prix.
       </p>
+      <p className="mt-2 inline-block rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-700">
+        Plan {info.limits.label} · {productsCount}/{info.limits.products} plats
+      </p>
+
+      {error === "limite" && (
+        <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">
+            ⚠️ Limite de votre plan atteinte ({info.limits.products} plats
+            maximum).
+          </p>
+          <p className="mt-1">
+            Pour ajouter plus de plats, passez au plan supérieur —{" "}
+            <a
+              href={whatsappSubscribeUrl(user.restaurant.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline"
+            >
+              contactez-nous sur WhatsApp
+            </a>
+            .
+          </p>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* Ajouter une catégorie */}

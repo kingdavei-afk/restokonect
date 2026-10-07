@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSessionUser, hashPassword } from "@/lib/auth";
 import { can, isRole } from "@/lib/permissions";
+import { getPlanInfo } from "@/lib/plans";
 
 export type EquipeState = { error?: string; success?: string };
 
@@ -32,6 +33,17 @@ export async function createUserAction(
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return { error: "Un compte existe déjà avec cet email." };
+
+  // Limite du plan : nombre maximum de comptes
+  const info = getPlanInfo(user.restaurant);
+  const usersCount = await prisma.user.count({
+    where: { restaurantId: user.restaurantId },
+  });
+  if (usersCount >= info.limits.users) {
+    return {
+      error: `Limite atteinte : votre plan ${info.limits.label} autorise ${info.limits.users} compte(s) maximum. Écrivez-nous sur WhatsApp pour passer au plan supérieur.`,
+    };
+  }
 
   await prisma.user.create({
     data: {

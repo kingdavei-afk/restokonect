@@ -1,53 +1,48 @@
 import Link from "next/link";
 import Logo from "@/components/logo";
-
-const WHATSAPP_URL =
-  "https://wa.me/2250748323191?text=" +
-  encodeURIComponent(
-    "Bonjour RestoKonect ! J'ai une question sur vos tarifs pour mon restaurant."
-  );
+import { whatsappSubscribeUrlForPlan } from "@/lib/plans";
 
 const plans = [
   {
-    name: "Découverte",
-    price: "Gratuit",
-    period: "pour toujours",
+    name: "Starter",
+    price: "5 900 F",
+    period: "par mois",
     highlight: false,
     features: [
-      "Caisse complète (espèces & Mobile Money)",
-      "Menu digital avec catégories",
-      "Journal des ventes",
-      "1 compte gérant",
-    ],
-    cta: "Commencer gratuitement",
-  },
-  {
-    name: "Starter",
-    price: "5 000 F",
-    period: "par mois",
-    highlight: true,
-    features: [
-      "Tout le plan Découverte",
-      "Menu QR + commandes WhatsApp",
-      "Notifications temps réel à la caisse",
-      "Impression des tickets",
       "Jusqu'à 3 comptes (gérant, caissier, serveur)",
+      "20 produits maximum dans le menu",
+      "Caisse complète (espèces & Mobile Money)",
+      "Menu QR + commandes WhatsApp en temps réel",
+      "Impression des tickets",
+      "Journal des ventes",
     ],
-    cta: "Essayer gratuitement",
   },
   {
     name: "Pro",
-    price: "12 500 F",
+    price: "11 900 F",
     period: "par mois",
-    highlight: false,
+    highlight: true,
     features: [
+      "Jusqu'à 7 comptes",
+      "60 produits maximum dans le menu",
       "Tout le plan Starter",
       "Gestion du stock avec alertes",
       "Personnel & pointage",
       "Statistiques avancées + export Excel",
-      "Comptes illimités & support prioritaire",
     ],
-    cta: "Essayer gratuitement",
+  },
+  {
+    name: "Business",
+    price: "24 900 F",
+    period: "par mois",
+    highlight: false,
+    features: [
+      "Jusqu'à 15 comptes",
+      "200 produits maximum dans le menu",
+      "Tout le plan Pro",
+      "Accompagnement et formation sur place",
+      "Support prioritaire 7j/7",
+    ],
   },
 ];
 
@@ -62,7 +57,7 @@ export default function PlansPage() {
               Retour
             </Link>
             <Link href="/register" className="btn btn-primary">
-              Créer un compte
+              Essai gratuit
             </Link>
           </div>
         </div>
@@ -73,74 +68,85 @@ export default function PlansPage() {
           Nos Tarifs
         </h1>
         <p className="mt-3 text-center text-lg text-stone-600">
-          Simple et transparent. En FCFA, sans engagement.
+          Simple et transparent, en FCFA, sans engagement.
           <br />
           <span className="font-semibold text-orange-600">
-            🎉 Tout est gratuit pendant la période de lancement !
+            🎁 Commencez par 14 jours d&apos;essai gratuit — sans carte
+            bancaire.
           </span>
         </p>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`card flex flex-col ${
-                plan.highlight
-                  ? "border-2 border-orange-500 shadow-lg"
-                  : ""
-              }`}
-            >
-              {plan.highlight && (
-                <p className="-mt-1 mb-2 text-center text-xs font-bold uppercase tracking-wide text-orange-600">
-                  ⭐ Le plus populaire
-                </p>
-              )}
-              <h2 className="text-xl font-bold">{plan.name}</h2>
-              <p className="mt-2">
-                <span className="text-3xl font-bold">{plan.price}</span>{" "}
-                <span className="text-sm text-stone-500">/ {plan.period}</span>
-              </p>
-              <ul className="mt-4 flex-1 space-y-2 text-sm text-stone-700">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex gap-2">
-                    <span className="text-green-600">✓</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/register"
-                className={`btn mt-6 w-full py-2.5 ${
-                  plan.highlight ? "btn-primary" : "btn-secondary"
+          {plans.map((plan) => {
+            const waUrl = whatsappSubscribeUrlForPlan(plan.name, plan.price);
+            return (
+              <div
+                key={plan.name}
+                className={`card flex flex-col ${
+                  plan.highlight ? "border-2 border-orange-500 shadow-lg" : ""
                 }`}
               >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
+                {plan.highlight && (
+                  <p className="-mt-1 mb-2 text-center text-xs font-bold uppercase tracking-wide text-orange-600">
+                    ⭐ Le plus populaire
+                  </p>
+                )}
+                <h2 className="text-xl font-bold">{plan.name}</h2>
+                <p className="mt-2">
+                  <span className="text-3xl font-bold">{plan.price}</span>{" "}
+                  <span className="text-sm text-stone-500">/ {plan.period}</span>
+                </p>
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-stone-700">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-2">
+                      <span className="text-green-600">✓</span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`btn mt-6 w-full py-2.5 ${
+                    plan.highlight ? "btn-primary" : "btn-secondary"
+                  }`}
+                >
+                  💬 S&apos;abonner via WhatsApp
+                </a>
+              </div>
+            );
+          })}
         </div>
 
-        <div className="card mt-10 flex flex-col items-center gap-2 text-center">
-          <h2 className="text-lg font-semibold">Une question sur les tarifs ?</h2>
-          <p className="text-sm text-stone-600">
-            Écrivez-nous directement sur WhatsApp, nous répondons en français.
+        <div className="mt-10 rounded-2xl bg-stone-100 px-6 py-5 text-center text-sm text-stone-600">
+          <p>
+            <strong>Comment ça marche :</strong> créez votre compte, testez
+            gratuitement pendant 14 jours (1 compte, 10 plats). À la fin de
+            l&apos;essai, choisissez votre plan et abonnez-vous en deux
+            messages sur WhatsApp. Paiement par Mobile Money accepté.
           </p>
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn mt-1 bg-[#25D366] px-6 py-2.5 text-white hover:brightness-95"
-          >
-            💬 Discuter sur WhatsApp
-          </a>
-          <a
-            href="/guide-restokonect.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 text-sm font-semibold text-orange-600 hover:underline"
-          >
-            📖 Découvrir l&apos;app avec le guide de démarrage (PDF)
-          </a>
+          <p className="mt-2">
+            Une question ?{" "}
+            <a
+              href="https://wa.me/2250748323191?text=Bonjour%20RestoKonect%20!%20J'ai%20une%20question%20sur%20vos%20tarifs."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#128C4A] hover:underline"
+            >
+              💬 Écrivez-nous sur WhatsApp
+            </a>{" "}
+            ou consultez le{" "}
+            <a
+              href="/guide-restokonect.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-orange-600 hover:underline"
+            >
+              guide de démarrage
+            </a>
+            .
+          </p>
         </div>
       </section>
     </main>

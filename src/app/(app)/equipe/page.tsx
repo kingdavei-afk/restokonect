@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { can, ROLE_LABELS, type Role } from "@/lib/permissions";
+import { getPlanInfo } from "@/lib/plans";
 import { prisma } from "@/lib/db";
 import { formatDateTime } from "@/lib/format";
 import AddUserForm from "./add-user-form";
@@ -15,6 +16,7 @@ export default async function EquipePage() {
     where: { restaurantId: user.restaurantId },
     orderBy: { createdAt: "asc" },
   });
+  const info = getPlanInfo(user.restaurant);
 
   return (
     <div>
@@ -30,7 +32,8 @@ export default async function EquipePage() {
 
       <div className="card mt-6">
         <h2 className="font-semibold">
-          Comptes existants ({users.length})
+          Comptes existants ({users.length}/{info.limits.users} — plan{" "}
+          {info.limits.label})
         </h2>
         <ul className="mt-3 divide-y divide-stone-100">
           {users.map((account) => (

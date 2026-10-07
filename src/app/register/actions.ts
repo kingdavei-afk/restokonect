@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { createSession, hashPassword } from "@/lib/auth";
+import { TRIAL_DAYS } from "@/lib/plans";
 import { uniqueSlug } from "@/lib/slug";
 
 export type RegisterState = { error?: string };
@@ -31,7 +32,12 @@ export async function registerAction(
   }
 
   const restaurant = await prisma.restaurant.create({
-    data: { name: restaurantName, slug: await uniqueSlug(restaurantName) },
+    data: {
+      name: restaurantName,
+      slug: await uniqueSlug(restaurantName),
+      plan: "TRIAL",
+      trialEndsAt: new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000),
+    },
   });
 
   const user = await prisma.user.create({
