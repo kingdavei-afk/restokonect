@@ -23,7 +23,7 @@ export default async function StockPage() {
       where: { stockItem: { restaurantId: user.restaurantId } },
       orderBy: { createdAt: "desc" },
       take: 15,
-      include: { stockItem: true },
+      include: { stockItem: true, user: true },
     }),
   ]);
 
@@ -179,6 +179,11 @@ export default async function StockPage() {
                   {m.stockItem.name} · {m.qty} {m.stockItem.unit}
                   {m.reason && (
                     <span className="text-stone-500"> — {m.reason}</span>
+                  )}
+                  {m.user && (
+                    <span className="ml-2 rounded bg-stone-200 px-1.5 py-0.5 text-xs font-medium text-stone-600">
+                      par {m.user.name}
+                    </span>
                   )}
                 </span>
                 <span className="text-stone-500">{formatDateTime(m.createdAt)}</span>

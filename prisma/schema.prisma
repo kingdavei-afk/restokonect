@@ -35,6 +35,7 @@ model User {
   passwordHash  String
   name          String
   role          String   @default("GERANT") // GERANT | SERVEUR | CAISSIER | SUPERADMIN
+  stockMovements StockMovement[]
   restaurantId  String? // null pour le super-admin (rattaché à aucun restaurant)
   restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
   createdAt     DateTime @default(now())
@@ -138,9 +139,11 @@ model StockMovement {
   type        MovementType
   qty         Float
   reason      String?
+  userId      String? // qui a effectué le mouvement (traçabilité)
   createdAt   DateTime     @default(now())
 
   stockItem   StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 model Employee {

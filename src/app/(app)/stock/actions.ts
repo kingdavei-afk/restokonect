@@ -56,7 +56,13 @@ export async function recordMovementAction(formData: FormData) {
   await prisma.$transaction([
     prisma.stockItem.update({ where: { id: item.id }, data: { qty: newQty } }),
     prisma.stockMovement.create({
-      data: { stockItemId: item.id, type: type as never, qty: Math.abs(qty), reason },
+      data: {
+        stockItemId: item.id,
+        type: type as never,
+        qty: Math.abs(qty),
+        reason,
+        userId: user.id, // traçabilité : qui a fait le mouvement
+      },
     }),
   ]);
 
