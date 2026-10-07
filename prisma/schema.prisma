@@ -26,6 +26,7 @@ model Restaurant {
   orders      Order[]
   stockItems  StockItem[]
   employees   Employee[]
+  stockClosures StockClosure[]
 }
 
 // Un utilisateur = un membre d'un restaurant (gérant par défaut)
@@ -36,6 +37,7 @@ model User {
   name          String
   role          String   @default("GERANT") // GERANT | SERVEUR | CAISSIER | SUPERADMIN
   stockMovements StockMovement[]
+  stockClosures  StockClosure[]
   restaurantId  String? // null pour le super-admin (rattaché à aucun restaurant)
   restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
   createdAt     DateTime @default(now())
@@ -120,6 +122,8 @@ model StockItem {
   unit           String  @default("unité") // kg, L, pièce, sac...
   qty            Float   @default(0)
   alertThreshold Float   @default(0)
+  packName       String? // ex: "casier", "carton" (pour les boissons)
+  packSize       Float?  // ex: 12 unités par casier
 
   restaurant     Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   movements      StockMovement[]
@@ -144,6 +148,19 @@ model StockMovement {
 
   stockItem   StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
   user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// Clôture du stock de fin de journée (inventaire manuel validé en 1 clic)
+model StockClosure {
+  id            String   @id @default(cuid())
+  restaurantId  String
+  userId        String? // qui a validé la clôture
+  itemsAdjusted Int      @default(0) // nombre d'articles corrigés
+  note          String?
+  createdAt     DateTime @default(now())
+
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 model Employee {

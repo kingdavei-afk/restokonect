@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { prisma } from "@/lib/db";
-import { formatDateTime } from "@/lib/format";
+import { formatDateFr, formatDateTime } from "@/lib/format";
 import {
   addStockItemAction,
   recordMovementAction,
@@ -14,7 +15,7 @@ export default async function StockPage() {
   if (!user) return null;
   if (!can(user, "stock")) redirect("/dashboard");
 
-  const [items, movements] = await Promise.all([
+  const [items, movements, closures] = await Promise.all([
     prisma.stockItem.findMany({
       where: { restaurantId: user.restaurantId },
       orderBy: { name: "asc" },
@@ -25,6 +26,12 @@ export default async function StockPage() {
       take: 15,
       include: { stockItem: true, user: true },
     }),
+    prisma.stockClosure.findMany({
+      where: { restaurantId: user.restaurantId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: { user: true },
+    }),
   ]);
 
   const lowStock = items.filter((i) => i.qty <= i.alertThreshold);
@@ -32,10 +39,15 @@ export default async function StockPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Stock</h1>
-      <p className="mt-1 text-sm text-stone-500">
-        Suivez vos ingrédients et marchandises. Les articles sous le seuil
-        d&apos;alerte sont surlignés en rouge.
-      </p>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-stone-500">
+          Suivez vos ingrédients et marchandises. Les articles sous le seuil
+          d&apos;alerte sont surlignés en rouge.
+        </p>
+        <Link href="/stock/cloture" className="btn btn-primary">
+          🌙 Clôture du jour
+        </Link>
+      </div>
 
       {lowStock.length > 0 && (
         <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -79,9 +91,26 @@ export default async function StockPage() {
           className="input w-32"
           placeholder="Seuil d'alerte"
         />
+        <input
+          name="packSize"
+          type="number"
+          step="any"
+          min={1}
+          className="input w-28"
+          placeholder="Contenu pack"
+        />
+        <input
+          name="packName"
+          className="input w-28"
+          placeholder="Nom pack"
+        />
         <button type="submit" className="btn btn-primary">
           Ajouter
         </button>
+        <p className="w-full text-xs text-stone-400">
+          Pack (optionnel, boissons) : ex. contenu 12, nom « casier » — vous
+          pourrez alors saisir vos mouvements directement en casiers.
+        </p>
       </form>
 
       {/* Liste du stock */}
@@ -108,6 +137,12 @@ export default async function StockPage() {
                   <p className="text-sm text-stone-500">
                     {item.qty} {item.unit} · seuil d&apos;alerte :{" "}
                     {item.alertThreshold} {item.unit}
+                    {item.packSize && item.packName && (
+                      <>
+                        {" "}· ≈ {(item.qty / item.packSize).toFixed(1)}{" "}
+                        {item.packName}(s) de {item.packSize}
+                      </>
+                    )}
                   </p>
                 </div>
 
@@ -130,6 +165,12 @@ export default async function StockPage() {
                     className="input w-20 py-1 text-xs"
                     placeholder="Qté"
                   />
+                  {item.packSize && item.packName && (
+                    <select name="unitType" className="input w-auto py-1 text-xs">
+                      <option value="unite">{item.unit}(s)</option>
+                      <option value="pack">{item.packName}(s)</option>
+                    </select>
+                  )}
                   <input
                     name="reason"
                     className="input w-36 py-1 text-xs"
@@ -154,6 +195,27 @@ export default async function StockPage() {
           );
         })}
       </div>
+
+      {/* Dernières clôtures */}
+      {closures.length > 0 && (
+        <div className="card mt-8">
+          <h2 className="font-semibold">Dernières clôtures</h2>
+          <ul className="mt-2 divide-y divide-stone-100">
+            {closures.map((c) => (
+              <li key={c.id} className="flex items-center justify-between py-2 text-sm">
+                <span>
+                  🌙 Clôture du {formatDateFr(c.createdAt)}
+                  {c.note && <span className="text-stone-500"> — {c.note}</span>}
+                </span>
+                <span className="text-stone-500">
+                  {c.itemsAdjusted} article(s) corrigé(s)
+                  {c.user && ` · par ${c.user.name}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Derniers mouvements */}
       <div className="card mt-8">
